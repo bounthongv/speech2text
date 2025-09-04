@@ -1,0 +1,1229 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Lao Speech Recognition</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        margin: 0;
+        padding: 0;
+        overflow-x: hidden;
+      }
+
+      .main-container {
+        display: flex;
+        min-height: 100vh;
+        background: white;
+      }
+
+      .sidebar {
+        width: 280px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 20px;
+        box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+        overflow-y: auto;
+        flex-shrink: 0;
+      }
+
+      .main-content {
+        flex: 1;
+        padding: 20px;
+        background: #f8f9fa;
+        overflow-y: auto;
+        max-height: 100vh;
+      }
+
+      .sidebar-header {
+        text-align: center;
+        margin-bottom: 30px;
+        padding-bottom: 20px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+      }
+
+      .sidebar-header h1 {
+        font-size: 1.5em;
+        margin-bottom: 5px;
+        color: white;
+      }
+
+      .sidebar-header p {
+        font-size: 0.9em;
+        opacity: 0.8;
+        margin: 0;
+      }
+
+      .sidebar-section {
+        margin-bottom: 25px;
+      }
+
+      .sidebar-section h6 {
+        color: rgba(255, 255, 255, 0.9);
+        font-size: 0.85em;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 15px;
+        font-weight: 600;
+      }
+
+      .main-header {
+        background: white;
+        padding: 20px;
+        margin: -20px -20px 20px -20px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+
+      .main-header h2 {
+        margin: 0;
+        color: #2c3e50;
+        font-size: 1.8em;
+      }
+
+      .upload-section {
+        border: 3px dashed #ddd;
+        border-radius: 10px;
+        padding: 40px;
+        text-align: center;
+        margin-bottom: 30px;
+        transition: all 0.3s ease;
+      }
+
+      .upload-section:hover {
+        border-color: #4facfe;
+        background: #f8f9ff;
+      }
+
+      .upload-section.dragover {
+        border-color: #4facfe;
+        background: #f0f8ff;
+      }
+
+      .file-input {
+        display: none;
+      }
+
+      .upload-btn {
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        color: white;
+        border: none;
+        padding: 15px 30px;
+        border-radius: 25px;
+        font-size: 1.1em;
+        cursor: pointer;
+        transition: transform 0.2s ease;
+      }
+
+      .upload-btn:hover {
+        transform: translateY(-2px);
+      }
+
+      .options {
+        margin: 20px 0;
+      }
+
+      .checkbox-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        margin: 15px 0;
+      }
+
+      .checkbox-container input[type="checkbox"] {
+        transform: scale(1.2);
+      }
+
+      .process-btn {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        padding: 15px 40px;
+        border-radius: 25px;
+        font-size: 1.2em;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: none;
+      }
+
+      .process-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+      }
+
+      .process-btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+      }
+
+      .status {
+        margin: 30px 0;
+        padding: 20px;
+        border-radius: 10px;
+        display: none;
+      }
+
+      .status.processing {
+        background: #fff3cd;
+        border: 1px solid #ffeaa7;
+        color: #856404;
+      }
+
+      .status.completed {
+        background: #d4edda;
+        border: 1px solid #c3e6cb;
+        color: #155724;
+      }
+
+      .status.error {
+        background: #f8d7da;
+        border: 1px solid #f5c6cb;
+        color: #721c24;
+      }
+
+      .result-text {
+        background: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 10px;
+        padding: 20px;
+        margin: 20px 0;
+        font-family: "Courier New", monospace;
+        font-size: 1.1em;
+        line-height: 1.6;
+        white-space: pre-wrap;
+        max-height: 300px;
+        overflow-y: auto;
+      }
+
+      .confidence {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin: 15px 0;
+      }
+
+      .confidence-bar {
+        flex: 1;
+        height: 10px;
+        background: #e9ecef;
+        border-radius: 5px;
+        overflow: hidden;
+      }
+
+      .confidence-fill {
+        height: 100%;
+        background: linear-gradient(
+          90deg,
+          #ff6b6b 0%,
+          #feca57 50%,
+          #48dbfb 100%
+        );
+        transition: width 0.5s ease;
+      }
+
+      .actions {
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+        margin: 20px 0;
+      }
+
+      .btn {
+        padding: 12px 25px;
+        border: none;
+        border-radius: 20px;
+        cursor: pointer;
+        font-size: 1em;
+        transition: all 0.3s ease;
+      }
+
+      .btn-primary {
+        background: #007bff;
+        color: white;
+      }
+
+      .btn-success {
+        background: #28a745;
+        color: white;
+      }
+
+      .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+      }
+
+      .spinner {
+        border: 3px solid #f3f3f3;
+        border-top: 3px solid #4facfe;
+        border-radius: 50%;
+        width: 30px;
+        height: 30px;
+        animation: spin 1s linear infinite;
+        display: inline-block;
+        margin-right: 10px;
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      .file-info {
+        background: #e3f2fd;
+        border: 1px solid #bbdefb;
+        border-radius: 8px;
+        padding: 15px;
+        margin: 15px 0;
+        display: none;
+      }
+
+      .supported-formats {
+        margin-top: 20px;
+        font-size: 0.9em;
+        color: #666;
+      }
+
+      .recording-section {
+        margin-bottom: 30px;
+        text-align: center;
+        padding: 20px;
+        border-radius: 10px;
+        background: #f8f9ff;
+      }
+
+      .record-btn {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: #ff6b6b;
+        border: none;
+        color: white;
+        font-size: 24px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto;
+      }
+
+      .record-btn.recording {
+        background: #ff4757;
+        animation: pulse 1.5s infinite;
+      }
+
+      @keyframes pulse {
+        0% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.1);
+        }
+        100% {
+          transform: scale(1);
+        }
+      }
+
+      .visualizer {
+        height: 60px;
+        width: 100%;
+        margin: 20px 0;
+        background: #f1f3f9;
+        border-radius: 5px;
+        overflow: hidden;
+      }
+
+      .timer {
+        font-size: 1.2em;
+        color: #666;
+        margin: 10px 0;
+      }
+
+      .recording-controls {
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+        margin-top: 15px;
+      }
+
+      .control-btn {
+        padding: 8px 15px;
+        border-radius: 20px;
+        border: none;
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+
+      .control-btn:hover {
+        transform: translateY(-2px);
+      }
+
+      .pause-btn {
+        background: #feca57;
+        color: white;
+      }
+
+      .stop-btn {
+        background: #ff4757;
+        color: white;
+      }
+
+      .drag-area {
+        border: 2px dashed #ccc;
+        padding: 2rem;
+        text-align: center;
+        border-radius: 10px;
+        background: #f8f9fa;
+        transition: all 0.3s ease;
+      }
+      .drag-area.active {
+        border-color: #007bff;
+        background: #e7f1ff;
+      }
+      .recording-visualizer {
+        width: 100%;
+        height: 100px;
+        background: #f8f9fa;
+        margin: 1rem 0;
+        border-radius: 5px;
+      }
+      .status-area {
+        margin-top: 2rem;
+        padding: 1rem;
+        border-radius: 5px;
+        background: #f8f9fa;
+      }
+      .phrase-list {
+        max-height: 300px;
+        overflow-y: auto;
+      }
+      .phrase-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.5rem;
+        border-bottom: 1px solid #eee;
+      }
+      .calibration-status {
+        padding: 1rem;
+        margin-bottom: 1rem;
+        border-radius: 5px;
+      }
+      .settings-panel {
+        background: #f8f9fa;
+        padding: 1rem;
+        border-radius: 5px;
+        margin-bottom: 1rem;
+      }
+
+      /* Editor Styles */
+      .editor-container {
+        padding: 20px;
+      }
+
+      .editor-toolbar {
+        border-bottom: 1px solid #dee2e6;
+        padding-bottom: 10px;
+        margin-bottom: 15px;
+      }
+
+      .editor-toolbar button {
+        margin-right: 5px;
+      }
+
+      #editor {
+        border: 1px solid #dee2e6;
+        padding: 15px;
+        background-color: #fff;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        line-height: 1.6;
+      }
+
+      #editor:focus {
+        outline: none;
+        border-color: #80bdff;
+        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+      }
+
+      .speaker-label {
+        color: #2c3e50;
+        font-weight: bold;
+        margin-top: 10px;
+        margin-bottom: 5px;
+      }
+
+      .timestamp {
+        color: #7f8c8d;
+        font-size: 0.9em;
+        margin-right: 10px;
+        display: inline-block;
+      }
+
+      .segment {
+        margin: 5px 0;
+        padding: 2px 0;
+      }
+
+      .segment.low-confidence {
+        background-color: rgba(255, 0, 0, 0.1);
+        border-bottom: 1px dashed #dc3545;
+      }
+
+      .suggestions-list {
+        max-height: 300px;
+        overflow-y: auto;
+      }
+
+      .suggestion-item {
+        cursor: pointer;
+        padding: 8px;
+        border-bottom: 1px solid #dee2e6;
+      }
+
+      .suggestion-item:hover {
+        background-color: #f8f9fa;
+      }
+
+      .suggestion-confidence {
+        float: right;
+        color: #6c757d;
+        font-size: 0.9em;
+      }
+
+      /* Calibration Results Styling */
+      .calibration-results, .noise-results {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border-radius: 10px;
+        padding: 20px;
+        margin: 10px 0;
+      }
+
+      .metric-card {
+        background: white;
+        border-radius: 8px;
+        padding: 15px;
+        text-align: center;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        margin-bottom: 10px;
+        transition: transform 0.2s ease;
+      }
+
+      .metric-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+      }
+
+      .metric-label {
+        font-size: 0.85em;
+        color: #6c757d;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 5px;
+      }
+
+      .metric-value {
+        font-size: 1.4em;
+        font-weight: bold;
+        color: #2c3e50;
+      }
+
+      .sidebar-btn {
+        width: 100%;
+        background: rgba(255, 255, 255, 0.15);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        color: white;
+        padding: 12px 15px;
+        border-radius: 8px;
+        font-size: 0.9em;
+        transition: all 0.3s ease;
+        margin-bottom: 10px;
+        text-align: left;
+      }
+
+      .sidebar-btn:hover {
+        background: rgba(255, 255, 255, 0.25);
+        border-color: rgba(255, 255, 255, 0.5);
+        color: white;
+        transform: translateY(-1px);
+      }
+
+      .sidebar-btn:disabled {
+        background: rgba(255, 255, 255, 0.1);
+        border-color: rgba(255, 255, 255, 0.2);
+        color: rgba(255, 255, 255, 0.6);
+      }
+
+      .sidebar-btn i {
+        margin-right: 8px;
+        width: 16px;
+        text-align: center;
+      }
+
+      .sidebar-info {
+        font-size: 0.75em;
+        color: rgba(255, 255, 255, 0.7);
+        margin-top: 5px;
+        margin-left: 24px;
+      }
+
+      .status-indicator {
+        display: inline-block;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        margin-right: 8px;
+        animation: pulse 2s infinite;
+      }
+
+      .status-ready {
+        background-color: #28a745;
+        animation: none;
+      }
+      .status-pending {
+        background-color: #ffc107;
+      }
+      .status-error {
+        background-color: #dc3545;
+        animation: none;
+      }
+
+      @keyframes pulse {
+        0% { opacity: 1; }
+        50% { opacity: 0.5; }
+        100% { opacity: 1; }
+      }
+
+      .transcription-content {
+        animation: fadeIn 0.5s ease-in;
+      }
+
+      .transcribed-text {
+        font-size: 1.1em;
+        line-height: 1.6;
+        color: #2c3e50;
+      }
+
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+
+      .btn-lg {
+        font-size: 1.2em;
+        border-radius: 50px;
+        transition: all 0.3s ease;
+      }
+
+      .btn-lg:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0,123,255,0.3);
+      }
+
+      /* Streaming transcription styles */
+      .streaming-indicator {
+        width: 12px;
+        height: 12px;
+        background: #28a745;
+        border-radius: 50%;
+        animation: pulse 1.5s infinite;
+      }
+
+      .live-transcript-text {
+        max-height: 4.5em; /* Approximately 3 lines */
+        overflow-y: auto;
+        line-height: 1.5;
+        font-size: 1em;
+        padding: 15px;
+        background: white;
+        border-radius: 8px;
+        border: 1px solid #dee2e6;
+        min-height: 4.5em;
+      }
+
+      .transcript-chunk {
+        display: inline-block;
+        margin: 2px;
+        padding: 4px 8px;
+        border-radius: 4px;
+        background-color: #d4edda;
+        border: 1px solid #c3e6cb;
+        color: #155724;
+      }
+
+      .transcript-chunk.interim-text {
+        background-color: #fff3cd;
+        border: 1px solid #ffeaa7;
+        color: #856404;
+        font-style: italic;
+      }
+
+      #transcriptionResult {
+        max-height: 70vh;
+        overflow-y: auto;
+        font-size: 1.2em;
+        line-height: 1.7;
+        padding: 20px;
+      }
+
+      #streamingTranscription {
+        min-height: 65vh;
+      }
+
+      .transcript-chunk {
+        display: inline;
+        padding: 2px 4px;
+        margin: 1px;
+        border-radius: 3px;
+        background: rgba(40, 167, 69, 0.1);
+        border-left: 3px solid #28a745;
+        animation: fadeInChunk 0.5s ease-in;
+      }
+
+      .transcript-chunk.low-confidence {
+        background: rgba(255, 193, 7, 0.1);
+        border-left-color: #ffc107;
+      }
+
+      .transcript-chunk.processing {
+        background: rgba(108, 117, 125, 0.1);
+        border-left-color: #6c757d;
+        animation: pulse 1s infinite;
+      }
+
+      @keyframes fadeInChunk {
+        from {
+          opacity: 0;
+          transform: translateY(5px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .confidence-indicator {
+        display: inline-block;
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        margin-left: 5px;
+      }
+
+      .confidence-high { background-color: #28a745; }
+      .confidence-medium { background-color: #ffc107; }
+      .confidence-low { background-color: #dc3545; }
+
+      .streaming-stats {
+        font-size: 0.8em;
+        color: #6c757d;
+        margin-top: 10px;
+        padding-top: 10px;
+        border-top: 1px solid #dee2e6;
+      }
+
+      /* Export Modal Styles */
+      .export-options {
+        margin-top: 15px;
+      }
+
+      .format-option {
+        display: flex;
+        align-items: center;
+        padding: 10px;
+        border: 1px solid #dee2e6;
+        border-radius: 4px;
+        margin-bottom: 10px;
+        cursor: pointer;
+      }
+
+      .format-option:hover {
+        background-color: #f8f9fa;
+      }
+
+      .format-option i {
+        font-size: 24px;
+        margin-right: 15px;
+      }
+
+      .format-option.selected {
+        border-color: #007bff;
+        background-color: rgba(0, 123, 255, 0.1);
+      }
+
+      /* Undo/Redo Toolbar */
+      .history-toolbar {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        z-index: 1000;
+      }
+
+      .history-toolbar button {
+        padding: 5px 10px;
+        margin-left: 5px;
+      }
+
+      /* Speaker Management */
+      .speaker-item {
+        display: flex;
+        align-items: center;
+        padding: 8px;
+        border-bottom: 1px solid #dee2e6;
+      }
+
+      .speaker-item .speaker-name {
+        flex-grow: 1;
+      }
+
+      .speaker-item .speaker-actions {
+        display: flex;
+        gap: 5px;
+      }
+
+      /* Alert Styles */
+      .alert-float {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 1050;
+        min-width: 300px;
+        max-width: 500px;
+        animation: slideIn 0.3s ease-out;
+      }
+
+      @keyframes slideIn {
+        from {
+          transform: translateX(100%);
+          opacity: 0;
+        }
+        to {
+          transform: translateX(0);
+          opacity: 1;
+        }
+      }
+
+      /* Responsive Adjustments */
+      @media (max-width: 768px) {
+        .main-container {
+          flex-direction: column;
+        }
+
+        .sidebar {
+          width: 100%;
+          max-height: 40vh;
+          order: 2;
+        }
+
+        .main-content {
+          order: 1;
+          max-height: 60vh;
+        }
+
+        .sidebar-header h1 {
+          font-size: 1.2em;
+        }
+
+        .transcription-container {
+          min-height: 50vh;
+        }
+
+        .transcription-content {
+          max-height: 45vh;
+        }
+
+        .alert-float {
+          width: 90%;
+          right: 5%;
+          top: 10px;
+        }
+      }
+
+      @media (max-width: 480px) {
+        .sidebar {
+          padding: 15px;
+        }
+
+        .main-content {
+          padding: 15px;
+        }
+
+        .sidebar-btn {
+          font-size: 0.8em;
+          padding: 10px 12px;
+        }
+
+        .transcription-container {
+          padding: 15px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="main-container">
+      <!-- Left Sidebar -->
+      <div class="sidebar">
+        <div class="sidebar-header">
+          <h1><i class="fas fa-microphone"></i> Speech Recognition</h1>
+          <h2 style="font-size: 1.2em; margin-top: 10px;">ການແປງສຽງເປັນຂໍ້ຄວາມ</h2>
+          <p>Real-time transcription system</p>
+          <p style="font-size: 0.8em; opacity: 0.9;">ລະບົບແປງສຽງເປັນຂໍ້ຄວາມທັນທີ</p>
+        </div>
+
+        <!-- Microphone Setup Section -->
+        <div class="sidebar-section">
+          <h6><i class="fas fa-cog"></i> Microphone Setup</h6>
+
+          <button id="calibrateBtn" class="sidebar-btn">
+            <i class="fas fa-sliders-h"></i> Calibrate Microphone
+          </button>
+          <div class="sidebar-info">Speak normally for a few seconds</div>
+
+          <button id="measureNoiseBtn" class="sidebar-btn">
+            <i class="fas fa-volume-down"></i> Measure Background Noise
+          </button>
+          <div class="sidebar-info">Stay silent for a few seconds</div>
+
+          <!-- Status Area -->
+          <div id="calibrationStatus" class="mt-3"></div>
+        </div>
+
+        <!-- Usage Status Section -->
+        <div class="sidebar-section">
+          <h6><i class="fas fa-chart-bar"></i> Usage Status</h6>
+          <div class="usage-info">
+            <div class="progress mb-2" style="height: 8px;">
+              <div class="progress-bar bg-primary" id="usageProgress" role="progressbar"
+                   style="width: {{ (usage.minutes_used / free_tier_minutes * 100) if usage else 0 }}%"></div>
+            </div>
+            <div class="d-flex justify-content-between text-white small">
+              <span id="usageText">{{ usage.minutes_used if usage else 0 }}/{{ free_tier_minutes }} min</span>
+              <span class="text-success">Free Tier</span>
+            </div>
+          </div>
+
+          <!-- Upgrade Options -->
+          <div class="mt-3">
+            <!-- Email Registration -->
+            <div id="emailUpgrade" class="mb-2">
+              <button class="btn btn-info btn-sm w-100" onclick="showEmailModal()">
+                <i class="fas fa-envelope"></i> Get 4 Hours/Month
+              </button>
+              <div class="text-white small text-center mt-1">
+                📧 Register email for more usage<br>
+                <span style="font-size: 0.7em; opacity: 0.8;">ລົງທະບຽນອີເມວເພື່ອໃຊ້ງານເພີ່ມຂຶ້ນ</span>
+              </div>
+            </div>
+
+            <!-- Buy Me a Coffee Section -->
+            <div class="text-center">
+              <div class="mb-2">
+                <a href="{{ config.BMC_URL }}" target="_blank"
+                   class="btn btn-warning btn-sm w-100">
+                  <i class="fas fa-coffee"></i> Unlimited Access
+                </a>
+              </div>
+              <div class="mb-2">
+                <button class="btn btn-success btn-sm w-100" onclick="showSupporterModal()">
+                  <i class="fas fa-check-circle"></i> Already Supported?
+                </button>
+              </div>
+              <div class="text-white small mt-1">
+                ☕ Support for unlimited usage!<br>
+                <span style="font-size: 0.7em; opacity: 0.8;">ສອນເພື່ອໃຊ້ງານໄມ່ມີຂອບເຂດ!</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Transcription Mode Section -->
+        <div class="sidebar-section">
+          <h6><i class="fas fa-settings"></i> Transcription Mode</h6>
+
+          <div class="form-check form-switch mb-3">
+            <input class="form-check-input" type="checkbox" id="streamingMode" checked>
+            <label class="form-check-label text-white" for="streamingMode">
+              <strong>Real-time Streaming</strong>
+            </label>
+          </div>
+
+          <!-- Recording Time Limit (only shown when switch is OFF) -->
+          <div id="recordingOptions" class="mb-3" style="display: none;">
+            <label for="recordingTimeLimit" class="form-label text-white small">Recording Time Limit:</label>
+            <div class="range-container">
+              <input type="range" class="form-range" id="recordingTimeLimit" min="5" max="30" step="5" value="10">
+              <div class="d-flex justify-content-between text-white small mt-1">
+                <span>5min</span>
+                <span id="timeLimitDisplay" class="fw-bold">10min</span>
+                <span>30min</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Recording Timer (only shown during recording) -->
+          <div id="recordingTimer" class="mb-3" style="display: none;">
+            <div class="text-center">
+              <div class="text-white">
+                <i class="fas fa-clock"></i> <span id="timerDisplay">00:00</span>
+              </div>
+              <div class="progress mt-1" style="height: 6px;">
+                <div class="progress-bar bg-danger" id="timerProgress" role="progressbar" style="width: 0%"></div>
+              </div>
+              <small class="text-muted">Remaining: <span id="remainingTime">10:00</span></small>
+            </div>
+          </div>
+
+          <div class="sidebar-info" id="modeDescription">Live transcription with instant results</div>
+
+          <button class="sidebar-btn" id="recordButton">
+            <i class="fas fa-broadcast-tower"></i> <span id="recordButtonText">Start Live Transcription</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Main Content Area -->
+      <div class="main-content">
+        <div id="alertArea"></div>
+
+        <div class="main-header">
+          <h2><i class="fas fa-file-alt text-primary"></i> Transcription Results</h2>
+        </div>
+
+        <!-- Recording Status -->
+        <div id="recordingStatus" class="mb-3"></div>
+        <canvas id="audioVisualizer" style="display: none; width: 100%; height: 100px; border-radius: 10px; margin: 20px 0;"></canvas>
+
+        <div class="mt-4">
+          <div class="d-flex align-items-center mb-3">
+            <h5 class="mb-0">
+              <i class="fas fa-file-alt text-primary"></i> Transcription Result
+            </h5>
+            <div class="ms-auto">
+              <span class="status-indicator status-pending" id="transcriptionStatusIndicator"></span>
+              <small class="text-muted" id="transcriptionStatusText">Ready to transcribe</small>
+            </div>
+          </div>
+          <!-- Real-time transcription display -->
+          <div id="streamingTranscription" class="border rounded p-4 mb-3" style="min-height: 120px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); display: none;">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <h6 class="mb-0">
+                <i class="fas fa-broadcast-tower text-primary"></i> Live Transcription
+              </h6>
+              <div class="d-flex align-items-center">
+                <div class="streaming-indicator me-2"></div>
+                <small class="text-muted">Streaming...</small>
+              </div>
+            </div>
+            <div id="liveTranscriptText" class="live-transcript-text">
+              <div class="text-center text-muted">
+                <i class="fas fa-microphone fa-2x mb-3"></i>
+                <p class="mb-0">Listening for speech...</p>
+                <small>Start speaking to see real-time transcription</small>
+              </div>
+            </div>
+          </div>
+
+          <!-- Traditional transcription display -->
+          <div class="position-relative">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <h5 class="mb-0">📝 Transcription Results</h5>
+              <div class="btn-group" id="transcriptionActions" style="display: none;">
+                <button type="button" class="btn btn-outline-primary btn-sm" id="copyBtn" title="Copy to clipboard">
+                  <i class="fas fa-copy"></i> Copy
+                </button>
+                <button type="button" class="btn btn-outline-secondary btn-sm" id="cutBtn" title="Cut to clipboard and clear">
+                  <i class="fas fa-cut"></i> Cut
+                </button>
+              </div>
+            </div>
+            <div id="transcriptionResult" class="border rounded p-4 bg-light" style="min-height: 120px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+              <div class="text-center text-muted">
+                <i class="fas fa-microphone-slash fa-2x mb-3"></i>
+                <p class="mb-0">No transcription yet...</p>
+                <small>Start recording to see your speech converted to text</small>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Email Registration Modal -->
+    <div class="modal fade" id="emailModal" tabindex="-1">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">
+              <i class="fas fa-envelope text-info"></i> Get More Usage Time
+            </h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <p>Register your email to get <strong>4 hours of transcription per month</strong> instead of 1 hour!</p>
+            <p style="font-size: 0.9em; color: #666; font-style: italic;">ລົງທະບຽນອີເມວເພື່ອເດືອນລະ 4 ຊົ່ວໂມງແທນທີ່ເປັນ 1 ຊົ່ວໂມງ!</p>
+
+            <div class="mb-3">
+              <label for="userEmail" class="form-label">Email Address</label>
+              <input type="email" class="form-control" id="userEmail" placeholder="your@email.com">
+              <div class="form-text">We'll only use this for account management. No spam!</div>
+            </div>
+
+            <div class="alert alert-info">
+              <i class="fas fa-gift"></i> <strong>Benefits:</strong>
+              <ul class="mb-0 mt-2">
+                <li>4 hours/month transcription (ຕິດຕາມສຽງ 4 ຊົ່ວໂມງຕໍ່ເດືອນ)</li>
+                <li>Email updates on new features (ຂ່າວທີ່ອັດເດດໄປທາງອີເມວ)</li>
+                <li>Priority support (ການສອນແບບຄະແນນ)</li>
+              </ul>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="button" class="btn btn-info" onclick="registerEmail()">
+              <i class="fas fa-envelope"></i> Register Email
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Supporter Verification Modal -->
+    <div class="modal fade" id="supporterModal" tabindex="-1">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">
+              <i class="fas fa-coffee text-warning"></i> Supporter Verification
+            </h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <p>Already supported us? Enter your email to get unlimited access!</p>
+            <p style="font-size: 0.9em; color: #666; font-style: italic;">ສາມາດເຂົ້າເຖິງໄດ້ແບບບໍ່ຈຳກັດ!</p>
+            
+            <div class="mb-3">
+              <label for="supporterEmail" class="form-label">Email Address</label>
+              <input type="email" class="form-control" id="supporterEmail" 
+                     placeholder="The email you used on Buy Me a Coffee">
+              <div class="form-text">Must match the email from your BMC support</div>
+            </div>
+            
+            <div class="alert alert-warning">
+              <i class="fas fa-info-circle"></i> <strong>Our Support Tiers:</strong><br>
+              <div class="mt-2">
+                <div class="mb-2">
+                  <strong>🎤 Lao STT Supporter ($3/month)</strong><br>
+                  <small>• Unlimited usage • Faster response times • Support free access</small>
+                </div>
+                <div>
+                  <strong>🌟 Premium Patron ($5/month)</strong><br>
+                  <small>• Priority access • Early features • Supporter chat • Recognition</small>
+                </div>
+              </div>
+            </div>
+            
+            <div class="alert alert-info">
+              <i class="fas fa-coffee"></i> <strong>Haven't supported yet?</strong><br>
+              <a href="https://buymeacoffee.com/laospeech" target="_blank" class="btn btn-warning btn-sm mt-2">
+                <i class="fas fa-coffee"></i> Support on Buy Me a Coffee
+              </a>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="button" class="btn btn-warning" onclick="verifySupporterEmail()">
+              <i class="fas fa-check"></i> Verify Access
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Load Bootstrap first -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Load Socket.IO from multiple CDNs for reliability -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.js"
+            onerror="this.onerror=null; this.src='https://cdn.socket.io/4.7.2/socket.io.min.js'"></script>
+
+    <!-- Load our app code after all other scripts and DOM elements -->
+    <script src="/static/js/app_clean.js?v=3.5"></script>
+    
+    <script>
+    // Supporter verification functions
+    function showSupporterModal() {
+        const modal = new bootstrap.Modal(document.getElementById('supporterModal'));
+        modal.show();
+    }
+    
+    function verifySupporterEmail() {
+        const email = document.getElementById('supporterEmail').value.trim();
+        
+        if (!email) {
+            alert('Please enter your email address');
+            return;
+        }
+        
+        // Show loading state
+        const button = document.querySelector('#supporterModal .btn-warning');
+        const originalText = button.innerHTML;
+        button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Verifying...';
+        button.disabled = true;
+        
+        fetch('/verify_supporter', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                email: email
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                alert(data.message);
+                // Close modal
+                const modal = bootstrap.Modal.getInstance(document.getElementById('supporterModal'));
+                modal.hide();
+                // Refresh page to show new tier status
+                setTimeout(() => location.reload(), 1000);
+            } else {
+                alert(data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error verifying supporter status. Please try again.');
+        })
+        .finally(() => {
+            // Restore button state
+            button.innerHTML = originalText;
+            button.disabled = false;
+        });
+    }
+    </script>
+  </body>
+</html>

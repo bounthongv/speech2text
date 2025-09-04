@@ -1,0 +1,40 @@
+{
+  "supporters": [
+    {
+      "email": "example@supporter.com",
+      "tier": "supporter",
+      "amount": "$3",
+      "added_date": "2024-08-24",
+      "notes": "Example Tier 1 - Lao STT Supporter"
+    },
+    {
+      "email": "premium@supporter.com", 
+      "tier": "premium",
+      "amount": "$5",
+      "added_date": "2024-08-24",
+      "notes": "Example Tier 2 - Premium Patron"
+    }
+  ],
+  "tiers": {
+    "supporter": {
+      "name": "Lao STT Supporter",
+      "amount": "$3/month",
+      "features": [
+        "🎤 Unlimited usage",
+        "⚡ Faster response times", 
+        "🙏 Support free access for Lao students and community"
+      ]
+    },
+    "premium": {
+      "name": "Premium Patron",
+      "amount": "$5/month", 
+      "features": [
+        "🎤 Unlimited usage + priority access",
+        "🚀 Early access to new features",
+        "💬 Join our supporter chat group",
+        "🌟 Recognition as a Premium Patron"
+      ]
+    }
+  },
+  "last_updated": "2024-08-24T10:00:00Z"
+}

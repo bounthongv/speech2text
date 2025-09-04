@@ -1,0 +1,28 @@
+# Core speech recognition
+google-cloud-speech==2.21.0
+SpeechRecognition==3.10.0
+
+# Audio processing
+scipy==1.14.0
+numpy==2.0.0
+PyAudio==0.2.14
+sounddevice==0.4.6
+wave==0.0.2
+
+# Document handling
+python-docx==1.1.2
+
+# Progress and display
+tqdm==4.66.1
+
+# Web application
+Flask==2.3.3
+Flask-SocketIO==5.3.6
+python-socketio==5.8.0
+Werkzeug==2.3.7
+gunicorn==21.2.0
+python-dotenv==1.0.0
+
+# New dependencies
+weasyprint==61.1
+html2text==2024.2.26
