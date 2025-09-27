@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: lao-speech-recognition
+    env: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn --worker-class eventlet -w 1 --bind 0.0.0.0:$PORT web_app:app
+    envVars:
+      - key: FLASK_ENV
+        value: production
+      - key: BMC_USERNAME
+        value: laospeech
+      - key: FREE_TIER_MINUTES
+        value: 60
+      - key: EMAIL_TIER_MINUTES
+        value: 240

@@ -1,0 +1,70 @@
+# Environment variables
+.env
+.env.local
+.env.production
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environment
+venv/
+.venv/
+
+# Application data
+usage_data.json
+users.json
+uploads/
+results/
+temp/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Audio and media files
+*.wav
+*.mp3
+*.m4a
+*.flac
+
+# Transcripts and outputs (specific patterns to avoid ignoring project files like lao_words.txt)
+mic_transcript*.txt
+output*.txt
+output_mic.txt
+transcript*.txt
+Voice_*_transcript*.txt
+transcription_result.txt
+
+# Models and large ML files
+models/**/*.bin
+optimum-*.json
+
+# Tools and binaries
+ffmpeg/
+
+# Project-specific temps
+Wav2Vec2.0/*.wav
+bk/
+whisper/audio.wav
+
+# Other
+.qodo/
+.cursor/
+*.log
+*.pickle
+
+# Ignore machine learning models
+models/
+
+# Ignore ffmpeg executables
+ffmpeg/bin/
+
+# You can also be more specific if you have other things in ffmpeg/
+# ffmpeg/bin/*.exe
